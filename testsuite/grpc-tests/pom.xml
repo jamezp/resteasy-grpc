@@ -224,6 +224,31 @@
         </testResources>
         <plugins>
             <plugin>
+                <groupId>dev.resteasy.grpc</groupId>
+                <artifactId>resteasy-maven-plugin</artifactId>
+                <version>${project.version}</version>
+                <configuration>
+                    <package-name>dev.resteasy.grpc.example</package-name>
+                    <class-name>CC1</class-name>
+                </configuration>
+                <executions>
+                    <execution>
+                        <id>generate-grpc-sources</id>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>generate</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>translate-grpc-sources</id>
+                        <phase>process-test-classes</phase>
+                        <goals>
+                            <goal>translate</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+            <plugin>
                 <artifactId>maven-surefire-plugin</artifactId>
                 <configuration>
                     <systemPropertyVariables>
@@ -266,164 +291,6 @@
             </plugin>
 
             <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>build-helper-maven-plugin</artifactId>
-                <version>3.2.0</version>
-                <executions>
-                    <execution>
-                        <id>proto</id>
-                        <phase>initialize</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>src/main/proto</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-generated</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>add-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/target/generated-sources/protobuf/java/</source>
-                                <source>${project.basedir}/target/generated-sources/protobuf/grpc-java/</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>java-test-generated</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/target/generated-sources/protobuf/java/</source>
-                                <source>${project.basedir}/target/generated-sources/protobuf/grpc-java/</source>
-                                <source>${project.basedir}/src/test/java</source>
-                            </sources>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>add-test-source</id>
-                        <phase>process-sources</phase>
-                        <goals>
-                            <goal>add-test-source</goal>
-                        </goals>
-                        <configuration>
-                            <sources>
-                                <source>${project.basedir}/target/generated-sources/protobuf/grpc-java/</source>
-                                <!--source>${project.basedir}/target/generatedSources/</source-->
-                            </sources>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
-                <groupId>org.codehaus.mojo</groupId>
-                <artifactId>exec-maven-plugin</artifactId>
-                <version>3.0.0</version>
-                <executions>
-                    <execution>
-                        <id>genproto</id>
-                        <phase>generate-sources</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>dev.resteasy.grpc.bridge.generator.protobuf.JavaToProtobufGenerator</mainClass>
-                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                            <arguments>
-                                <argument>${project.basedir}</argument>
-                                <argument>dev.resteasy.grpc.example</argument>
-                                <argument>dev.resteasy.grpc.example</argument>
-                                <argument>${root.class}</argument>
-                            </arguments>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>exec.cleanupDaemonThreads</key>
-                                    <value>false</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>genprotobuf</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>dev.resteasy.grpc.bridge.generator.protobuf.JavabufTranslatorGenerator</mainClass>
-                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                            <arguments>
-                                <argument>${project.basedir}/target/generated-sources/protobuf/java</argument>
-                                <argument>dev.resteasy.grpc.example.${root.class}</argument>
-                            </arguments>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>exec.cleanupDaemonThreads</key>
-                                    <value>false</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>reader-writer</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>dev.resteasy.grpc.bridge.generator.protobuf.ReaderWriterGenerator</mainClass>
-                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                            <arguments>
-                                <argument>${project.build.directory}/generated-sources/protobuf/grpc-java</argument>
-                                <argument>dev.resteasy.grpc.example.${root.class}_proto</argument>
-                                <argument>${root.class}</argument>
-                            </arguments>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>exec.cleanupDaemonThreads</key>
-                                    <value>false</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                    </execution>
-                    <execution>
-                        <id>genGRPC</id>
-                        <phase>process-classes</phase>
-                        <goals>
-                            <goal>java</goal>
-                        </goals>
-                        <configuration>
-                            <mainClass>dev.resteasy.grpc.bridge.generator.ServiceGrpcExtender</mainClass>
-                            <cleanupDaemonThreads>false</cleanupDaemonThreads>
-                            <arguments>
-                                <argument>${root.class}</argument>
-                                <argument>${servlet.name}</argument>
-                                <argument>dev.resteasy.grpc.example</argument>
-                                <argument>${project.basedir}/src/main/proto</argument>
-                                <argument>${project.build.directory}/generated-sources/protobuf/grpc-java</argument>
-                            </arguments>
-                            <systemProperties>
-                                <systemProperty>
-                                    <key>exec.cleanupDaemonThreads</key>
-                                    <value>false</value>
-                                </systemProperty>
-                            </systemProperties>
-                        </configuration>
-                    </execution>
-                </executions>
-            </plugin>
-
-            <plugin>
                 <groupId>org.xolstice.maven.plugins</groupId>
                 <artifactId>protobuf-maven-plugin</artifactId>
                 <version>0.6.1</version>
@@ -431,7 +298,7 @@
                     <protocArtifact>com.google.protobuf:protoc:3.21.7:exe:${os.detected.classifier}</protocArtifact>
                     <pluginId>grpc-java</pluginId>
                     <pluginArtifact>io.grpc:protoc-gen-grpc-java:1.54.1:exe:${os.detected.classifier}</pluginArtifact>
-                    <clearOutputDirectory>true</clearOutputDirectory>
+                    <clearOutputDirectory>false</clearOutputDirectory>
                 </configuration>
                 <executions>
                     <execution>

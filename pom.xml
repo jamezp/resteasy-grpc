@@ -104,6 +104,7 @@
         <module>grpc-test-bom</module>
         <module>grpc-bridge</module>
         <module>grpc-bridge-runtime</module>
+        <module>maven-plugin</module>
         <module>testsuite</module>
     </modules>
 
